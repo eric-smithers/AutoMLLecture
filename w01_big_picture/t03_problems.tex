@@ -1,0 +1,293 @@
+% !TeX spellcheck = en_US
+
+\input{../latex_main/main.tex}
+
+
+
+\title[AutoML: Problems]{AutoML: Introduction}
+\subtitle{Overview of AutoML Problems}
+\author[Marius Lindauer]{Bernd Bischl \and Frank Hutter \and Lars Kotthoff\newline \and \underline{Marius Lindauer} \and Joaquin Vanschoren}
+\institute{}
+\date{}
+
+
+
+% \AtBeginSection[] % Do nothing for \section*
+% {
+%   \begin{frame}{Outline}
+%     \bigskip
+%     \vfill
+%     \tableofcontents[currentsection]
+%   \end{frame}
+% }
+
+\begin{document}
+	
+	\maketitle
+	
+
+%----------------------------------------------------------------------
+\begin{frame}[c]{Objectives of AutoML}
+
+Different metrics to measure the success of ML and AutoML:
+
+\begin{itemize}
+	\item Accuracy on a validation dataset
+	\pause
+	\item AUC-ROC
+	\pause
+	\item precision \& recall
+	\item \ldots
+	\pause
+	\item Memory consumption
+	\item Inference time
+	\item \ldots
+\end{itemize}
+
+\pause
+\medskip
+
+\begin{itemize}
+	\item[$\leadsto$] AutoML optimizes an arbitrary cost function, denoted as $\cost$.
+	\pause
+	\item[$\leadsto$] $\cost(\cdot)$ can also return several cost metrics
+\end{itemize}
+
+
+\end{frame}
+%-----------------------------------------------------------------------	
+%----------------------------------------------------------------------
+\begin{frame}[c]{Hyperparameters of an SVM}
+
+\centering
+\includegraphics[width=0.7\textwidth]{images/sklearn_svm_doc.png}
+
+\end{frame}
+%-----------------------------------------------------------------------	
+%----------------------------------------------------------------------
+\begin{frame}[c]{Hyperparameter Optimization}
+
+\begin{block}{Definition}
+	Let 
+	\begin{itemize}
+		\item $\conf$ be the hyperparameters of an ML algorithm $\algo$ with domain $\pcs$,
+		\pause
+		\item $\dataset_{opt}$ be a dataset which is split into $\datasettrain$ and $\datasetval$ 
+		\pause
+		\item $\cost(\algo_{\conf}, \dataset_{train}, \dataset_{valid})$ denote the cost of $\algo_{\conf}$ trained on $\datasettrain$ and evaluated on $\datasetval$.
+	\end{itemize}
+	\pause
+	The \emph{hyper-parameter optimization (HPO)} problem is to find a hyper-parameter configuration that minimizes this cost:
+	\begin{equation}
+	\optconf \in \argmin_{\conf \in \pcs} \cost(\algo_{\conf}, \dataset_{train}, \dataset_{valid}) \nonumber  
+	\end{equation}
+\end{block}
+
+\pause
+Remarks: 
+
+\begin{itemize}
+	\item $\argmin$ returns a set of optimal points of a given function. It suffices to find one element of this set and thus we use $\in$ instead of $=$.
+	\pause
+	\item Sometimes, we want to optimize for different metrics, instead of one
+	\begin{itemize}
+		\item[$\leadsto$] multi-objective optimization and Pareto fronts
+	\end{itemize}
+\end{itemize}
+
+\end{frame}
+%-----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{Choosing an Algorithm}
+
+\begin{itemize}
+	\item Over the years, many ML-algorithms were proposed
+	\pause
+	\item Most of these still have a reason for existence
+	\pause
+	\item Examples for classification:
+	\begin{itemize}
+		\item logistic regression
+		\item k-nearest neighbor
+		\item na\"ive Bayes
+		\item support vector machine
+		\item decision tree
+		\item random forest
+		\item gradient boosting
+		\item multi-layer perceptron
+		\item residual networks
+		\item ...
+	\end{itemize}
+	\pause
+	\item studied $179$ classifiers on $121$ datasets   	     \lit{\href{http://jmlr.org/papers/volume15/		  	 	delgado14a/delgado14a.pdf}{Fern\'andez-Delgado 		        et al. 2015}}
+	\pause
+	\item In practice, we actually want to jointly choose\newline the best ML-algorithm and its hyperparameters
+\end{itemize}
+
+
+\end{frame}
+%-----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{CASH: Combined Algorithm Selection and\newline Hyperparameter Optimization}
+
+\begin{block}{Definition}
+	Let
+	\begin{itemize}
+		\item \alert{$\algos = \{\algo_1, \algo_2, \ldots, \algo_k\}$ be a set of algorithms (a.k.a. portfolio)}
+		\item $\pcs$ be a set of hyperparameters of each machine learning algorithm $\algo_i$
+		\item $\dataset_{opt}$ be a dataset which is split into $\dataset_{train}$ and $\dataset_{valid}$ 
+		\item $\cost(\algo_{\conf}, \dataset_{train}, \dataset_{valid})$ denote the cost of $\algo_{\conf}$ trained on $\dataset_{train}$ and evaluated on $\dataset_{valid}$.
+	\end{itemize}
+	we want to find \alert{the best combination of algorithm $\algo \in \mathbf{A}$ and its hyperparameter configuration $\conf \in \pcs$} minimizing:
+	\begin{equation}
+	(\algo^*, \optconf) \in \argmin_{\algo \in \algos, \conf \in \pcs} \cost(\algo_{\conf}, \dataset_{train}, \dataset_{valid}) \nonumber
+	\end{equation}
+\end{block}
+
+\end{frame}
+%-----------------------------------------------------------------------	
+%----------------------------------------------------------------------
+\begin{frame}[c]{Architectures of Neural Networks}
+
+\begin{columns}
+	\column{0.5\textwidth}
+	
+	\begin{itemize}
+		\item Many architecture were proposed
+		\item Differences in 
+		\begin{itemize}
+			\item Depth
+			\item Resolution
+			\item Width
+			\item Operators
+			\item Connections
+			\item ...
+		\end{itemize}
+	\end{itemize}
+	
+	\column{0.5\textwidth}
+	
+	\centering
+	\includegraphics[width=0.7\textwidth]{images/overview_achitecture_perf.PNG}\newline
+	on Imagenet~\lit{\href{https://arxiv.org/pdf/1605.07678.pdf}{Canzian et al. 2017}}
+	
+\end{columns}
+
+\pause
+\begin{itemize}
+	\item Already on a single dataset such as ImageNet,\\ it is not obvious which architeture to choose
+	\pause
+	\item For other datasets, you might need different architectures\\ to achieve top-performance
+	
+	\pause
+	\begin{itemize}
+		\item For similar datasets, you might use scaled versions of known architectures\\ (e.g., CIFAR10 and Imagenet)
+	\end{itemize}
+\end{itemize}
+
+\end{frame}
+%-----------------------------------------------------------------------	
+%----------------------------------------------------------------------
+\begin{frame}[c]{Neural Architecture Search (NAS)}
+
+\begin{block}{Definition}
+	Let 
+	\begin{itemize}
+		\item $\conf$ be \alert{an architecture for a deep neural network $N$} with domain $\pcs$,
+		\item $\dataset_{opt}$ be a dataset which is split into $\dataset_{train}$ and $\dataset_{valid}$ 
+		\item $\cost(N_{\conf}, \dataset_{train}, \dataset_{valid})$ denote the cost of $N_{\conf}$ trained on $\dataset_{train}$ and evaluated on $\dataset_{valid}$.
+	\end{itemize}
+	The \emph{neural architecture search (NAS)} problem is to find an architecture that minimizes this cost:
+	\begin{equation}
+	\conf^* \in \argmin_{\conf \in \pcs} \cost(N_{\conf}, \dataset_{train}, \dataset_{valid}) \nonumber  
+	\end{equation}
+\end{block}
+
+\pause
+\smallskip
+Remark:
+\begin{itemize}
+	\item very similar to the HPO definition
+	\pause
+	\item In practice, you want jointly optimize HPO and NAS~\lit{\href{https://ml.informatik.uni-freiburg.de/papers/18-AUTOML-EfficientNAS.pdf}{Zela et al. 2018}}
+\end{itemize}
+
+\end{frame}
+%-----------------------------------------------------------------------	
+%----------------------------------------------------------------------
+\begin{frame}[c]{Per-Instance Algorithm Selection}
+
+\begin{itemize}
+	\item For solving the HPO, CASH and NAS problem, we use some kind of optimization approach to \alert{search} for a solution
+	\pause
+	\item A different view: Can we learn from data and thus \alert{predict}\\ an algorithm/ hyperparameter configuration/ neural architecture?
+\end{itemize}
+
+\pause
+\begin{block}{Definition}
+	Let 
+	\begin{itemize}
+		\item $p(\dataset)$ be a probability \alert{distribution} over datasets $\dataset \in \datasets$,
+		\pause
+		\item $\portfolio$ a portfolio of algorithms $\algo \in \portfolio$, and
+		\pause
+		\item $\cost: \portfolio \times \datasets \rightarrow \perf$ be a cost metric   
+	\end{itemize}
+	
+	\pause
+	the \emph{per-instance algorithm selection problem} is to obtain a mapping 
+	$s: \dataset \mapsto \algo$ 
+	such that
+	$$\argmin_{s} \int_{\datasets} \cost(s(\dataset),\dataset) p(\dataset) \diff\dataset$$
+\end{block}
+
+\end{frame}
+%-----------------------------------------------------------------------	
+%----------------------------------------------------------------------
+\begin{frame}[c]{Dynamic Algorithm Configuration}
+
+\begin{itemize}
+	\item So far, we assume that an algorithm runs with some given settings
+	\pause
+	\item However, some settings, such as learning rate, have to be adapted over time
+\end{itemize}
+
+\pause
+
+\begin{block}{Definition}
+	Let 
+	\begin{itemize}
+		\item $\conf$ be a hyperparameter configuration of an algorithm $\algo$,
+		\pause
+		\item $p(\dataset)$ be a probability distribution over datasets $\dataset \in \datasets$,
+		\pause
+		\item $\stateRL_t$ be a state description of $\algo$ solving $\dataset$ at time point $t$,
+		\pause
+		\item $\cost: \policies \times \datasets \to \perf$ be a cost metric assessing the \alert{cost of a conf. policy $\pi \in \Pi$} on $\dataset \in \datasets$
+	\end{itemize}
+	
+	\pause
+	the \emph{dynamic algorithm configuration problem (DAC)} is to obtain a configuration policy $\policy^* : \stateRL_t \times \dataset \mapsto \conf$ by optimizing its cost across a distribution of datasets:
+	\begin{equation}
+	\pi^* \in \argmin_{\policy \in \policies} \int_{\datasets} p(\dataset) c(\policy, \dataset) \diff \dataset \nonumber
+	\end{equation}
+\end{block}
+
+\end{frame}
+%-----------------------------------------------------------------------	
+%-----------------------------------------------------------------------	
+%----------------------------------------------------------------------
+\begin{frame}[c]{Summary}
+
+\begin{description}
+	\item[HPO] Search for the best hyperparameter configuration of a ML algorithm
+	\item[CASH] Search for the best combination of algorithm and hyperparameter configuration
+	\item[NAS] Search for the architecture of neural network
+	\bigskip
+	\item[Selection] Predict the best algorithm (and its hyperparameter configuration)
+	\item[DAC] Predict the best hyperparameter configuration for an algorithm state\\ at a given time point 
+\end{description}
+
+\end{frame}
+%-----------------------------------------------------------------------	
+\end{document}

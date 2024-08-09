@@ -1,0 +1,79 @@
+
+\input{../latex_main/main.tex}
+
+
+
+\title[AutoML: Overview]{AutoML: Algorithm Selection} % week title
+\subtitle{Overview and Motivation} % video title
+\author[Lars Kotthoff]{Bernd Bischl \and Frank Hutter \and \underline{Lars Kotthoff}\newline \and Marius Lindauer \and Joaquin Vanschoren}
+\institute{}
+\date{}
+
+
+
+% \AtBeginSection[] % Do nothing for \section*
+% {
+%   \begin{frame}{Outline}
+%     \bigskip
+%     \vfill
+%     \tableofcontents[currentsection]
+%   \end{frame}
+% }
+
+\begin{document}
+	
+	\maketitle
+	
+
+%----------------------------------------------------------------------
+%----------------------------------------------------------------------
+
+%----------------------------------------------------------------------
+\begin{frame}[c]{Algorithm Selection}
+    \begin{center}
+        \Large{Given a problem, choose the best algorithm to solve it.} \lit{\href{https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.461.7199&rep=rep1&type=pdf}{Rice. 1975}}
+    \end{center}
+    %\lit{Rice, John R. ``The Algorithm Selection Problem.'' Advances in
+   % Computers 15 (1976): 65–118.}
+\end{frame}
+
+\begin{frame}[c]{Algorithm Selection}
+\begin{block}{More formally}
+        Let 
+        \begin{itemize}
+                \item $p(\dataset)$ be a probability distribution over datasets $\dataset \in \datasets$,
+                \item $\portfolio$ a portfolio of algorithms $\algo \in \portfolio$, and
+                \item $\cost: \portfolio \times \datasets \rightarrow \perf$ be a cost metric   
+        \end{itemize}
+        
+        the \emph{per-instance algorithm selection problem} is to obtain a mapping 
+        $s: \dataset \mapsto \algo$ 
+        such that
+        $$\argmin_{s} \int_{\datasets} \cost(s(\dataset),\dataset) p(\dataset) \diff\dataset$$
+\end{block}
+
+\end{frame}
+%-----------------------------------------------------------------------
+
+\begin{frame}[c,allowframebreaks]{Motivation: Performance Differences  \litw{\href{https://link.springer.com/chapter/10.1007/978-3-030-01768-2_25}{Strang et al. 2018}}}
+\begin{center}
+\includegraphics[height=.62\textheight]{images/motivation}
+\end{center}
+
+%\lit{Strang, Benjamin, Peter van der Putten, Jan N. van Rijn, and Frank Hutter.
+    %Don’t Rule Out Simple Models Prematurely: A Large Scale Benchmark Comparing
+   % Linear and Non-Linear Classifiers in OpenML.% In Advances in Intelligent
+    %Data Analysis XVII, 303–15. Springer 2018.}%
+
+\framebreak
+
+\begin{center}
+\includegraphics[height=.63\textheight]{images/motivation2}
+\end{center}
+%\lit{Strang, Benjamin, Peter van der Putten, Jan N. van Rijn, and Frank Hutter.
+ %   ``Don’t Rule Out Simple Models Prematurely: A Large Scale Benchmark Comparing
+  %  Linear and Non-Linear Classifiers in OpenML.'' In Advances in Intelligent
+   % Data Analysis XVII, 303–15. Springer 2018.}
+\end{frame}
+
+\end{document}

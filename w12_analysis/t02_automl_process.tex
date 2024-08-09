@@ -1,0 +1,174 @@
+% !TeX spellcheck = en_US
+
+\input{../latex_main/main.tex}
+
+
+
+\title[AutoML: Optimization Process]{AutoML: Interpretability}
+\subtitle{Studying the AutoML Optimization Process}
+\author[Marius Lindauer]{Bernd Bischl \and Frank Hutter \and Lars Kotthoff\newline \and \underline{Marius Lindauer} \and Joaquin Vanschoren}
+\institute{}
+\date{}
+
+
+
+% \AtBeginSection[] % Do nothing for \section*
+% {
+%   \begin{frame}{Outline}
+%     \bigskip
+%     \vfill
+%     \tableofcontents[currentsection]
+%   \end{frame}
+% }
+
+\begin{document}
+	
+	\maketitle
+	
+
+%----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c,fragile]{Idea}
+
+\begin{center}
+\scalebox{0.9}{
+	\let\oldpause=\pause \def\pause{} 
+	\input{tikz/automl_analysis_overview.tex}
+	\let\pause=\oldpause
+}
+\end{center}
+
+\begin{itemize}
+	\item[$\leadsto$] focus on how the AutoML optimizer samples from the design space $\pcs$ 
+\end{itemize}
+
+\end{frame}
+%-----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{Analyzing the Sampling Behavior}
+
+
+\begin{columns}
+	
+	\column{0.4\textwidth}
+	\begin{center}
+		% Created by Katha as part of the BOBO Paper
+		\includegraphics[width=1.0\textwidth]{images/gpmcmc_branin_def_vs_inc.png}\\
+		Source: \lit{\href{https://arxiv.org/pdf/1908.06674.pdf}{Lindauer et al. 2019}}
+	\end{center}
+	
+	\column{0.6\textwidth}
+	
+	\begin{itemize}
+		\item Plot of a 1D or 2D function
+		\pause
+		\item Background shows the ground truth\\
+		 (real function values)
+		\pause
+		\item Dots are sampled points in the search space
+		\pause
+		\item Typical approach in Bayesian Optimization community
+		\pause
+		\medskip
+		\item[$\leadsto$] Impossible for higher dimensional problems?
+	\end{itemize}
+
+\end{columns}
+
+\end{frame}
+%-----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{Analyzing the Sampling Behavior in $N$-D}
+
+
+\begin{columns}
+	
+	\column{0.4\textwidth}
+	\begin{center}
+		% TODO: get a better example and show it over time
+		\includegraphics[width=1.0\textwidth]{images/configurator_footprint0.png}\\
+		Source: \lit{\href{https://arxiv.org/pdf/1908.06756.pdf}{Lindauer et al. 2019}}
+	\end{center}
+	
+	\column{0.6\textwidth}
+	
+	\begin{itemize}
+		\item Same idea as before\\
+		 but we have to project $N$-D into $2$-D
+		 \pause
+		\begin{enumerate}
+			\item Use an MDS to project down to $2$-D
+					 \pause
+			\item Each dot is single hyperparameter configuration
+					 \pause
+			\item Red squares are intermediate incumbents
+					 \pause
+			\item The background is colored wrt a performance-estimate\\ (e.g., reusing model fitted during BO) 
+					 \pause
+			\item Extension: Animation by showing\\ how points get added over time
+		\end{enumerate}
+	\end{itemize}
+	
+\end{columns}
+
+\end{frame}
+%-----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{Parallel Coordinate Plot \litw{\href{https://storage.googleapis.com/pub-tools-public-publication-data/pdf/bcb15507f4b52991a0783013df4222240e942381.pdf}{Golovin et al. 2017}}}
+
+\centering
+\includegraphics[width=0.9\textwidth]{images/parallel_coordinates_linear_cost_log_sampling_100}
+\begin{flushright}
+	Source:  \lit{\href{https://arxiv.org/pdf/1908.06756.pdf}{Lindauer et al. 2019}}
+\end{flushright}
+
+\begin{itemize}
+	\item Each coordinate is one hyperparameter; 
+	\item Except the most left one: cost or loss
+\end{itemize}
+
+\end{frame}
+%-----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{Multi-Fidelity Checks}
+
+\begin{columns}
+	
+	\column{0.4\textwidth}
+	\begin{center}
+		% TODO: get a better example and show it over time
+		\includegraphics[width=1.0\textwidth]{images/budget_scatter.png}\\
+		Source: \lit{\href{https://arxiv.org/pdf/1908.06756.pdf}{Lindauer et al. 2019}}
+	\end{center}
+	
+	\column{0.6\textwidth}
+	
+	\begin{itemize}
+		\item Challenge of multi-fidelity approaches:
+		\begin{itemize}
+			\item How to choose the fidelities (a.k.a. budgets)
+		\end{itemize}
+		 \pause
+		\item Important Property:
+		\begin{itemize}
+			\item Decisions on small budgets should be\\
+			 reasonable for higher budgets
+		\end{itemize}
+			 \pause
+		\item Analysis:
+		\begin{enumerate}
+			\item Scatter plot of performance on\\
+			 Budget X vs. Budget Y
+			\item Each dot is sampled hyperparameter configuration
+			\item Compute rank correlation (here: 0.69)
+		\end{enumerate}
+	\end{itemize}
+	
+\end{columns}
+
+
+\end{frame}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\end{document}

@@ -1,0 +1,134 @@
+
+\input{latex_main/main.tex}
+
+
+
+\title[AutoML: Overview]{AutoML: Dynamic Algorithm Configuration}
+\subtitle{Overview}
+\author[Marius Lindauer]{Bernd Bischl \and Frank Hutter \and Lars Kotthoff\newline \and \underline{Marius Lindauer} \and Joaquin Vanschoren}
+\institute{}
+\date{}
+
+
+
+% \AtBeginSection[] % Do nothing for \section*
+% {
+%   \begin{frame}{Outline}
+%     \bigskip
+%     \vfill
+%     \tableofcontents[currentsection]
+%   \end{frame}
+% }
+
+\begin{document}
+	
+	\maketitle
+	
+
+%----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{Black vs. Grey vs. White Box}
+
+\begin{itemize}
+	\item Often we treat AutoML as a \alert{black-box problem}
+	\begin{itemize}
+		\item Black box: We choose input to the black box and observe outcome
+		\pause
+		\item E.g., classical hyperparameter optimizer:\\ Input: Hyperparameter configuration $\to$ Output: Accuracy
+	\end{itemize}
+   \pause
+   \smallskip
+   \item We discussed how to extend AutoML to a more \alert{grey-box approach}:	
+   \begin{itemize}
+     	\item Grey Box: We still choose the input, but we can observe more than the outcome,\\ e.g, intermediate results
+     	\pause
+     	\item We might can control the ``box'' a bit,  e.g., early termination
+     	\pause
+        \item E.g., learning curve predictions, multi-fidelity optimization, \ldots
+        \pause
+        \item[$\leadsto$] often more efficient than black-box approaches (if done right)
+   \end{itemize}
+   \pause
+   \smallskip
+   \item Ultimately, we would like to treat AutoML as a \alert{white-box problem}
+   \begin{itemize}
+     	\item White-box: We can observe and control all details of an algorithm run
+   \end{itemize}
+	\pause
+	\medskip
+   \item[$\leadsto$] Goal: \alert{Replace hyperparameter heuristics or even algorithm components by learned policies}
+\end{itemize}
+
+
+\end{frame}
+%-----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{Iterative Optimization Heuristics}
+
+\begin{block}{IOHs}
+	Iterative Optimization Heuristics (IOHs) propose a set of solution candidates in each iteration
+	based on previous evaluations.
+\end{block}
+
+\pause
+\smallskip
+Important Observations:
+\begin{itemize}
+	\item Many ML algorithms are  \alert{iterative} in nature, in particular for big data, e.g.:
+	\begin{itemize}
+		\item SGD (for linear models or for deep neural networks)
+		\item Tree-based algorithms
+	\end{itemize}
+	\pause
+	\smallskip
+	\item A \alert{solution candidate} refers to a (partially) trained model (e.g., weights of neural network)
+	\begin{itemize}
+		\item If we use an evolutionary strategy as in neural evolution,\newline we have a population of solution candidates
+	\end{itemize}
+	\pause
+	\smallskip
+	\item Hopefully, the \alert{quality} of solution candidates \alert{improves} in each iteration
+	\begin{itemize}
+		\item Update of the weights of a neural network
+	\end{itemize}
+	\pause
+	\smallskip
+	\item Main component is the \alert{heuristic for proposal mechanism} of new solution candidates
+\end{itemize}
+
+\end{frame}
+%-----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{Learning for IOHs}
+
+\begin{block}{Dynamic Adaptation of Hyperparameters}
+	The goal is to dynamically adapt hyperparameters based on some feedback from the algorithm.
+\end{block}
+
+\bigskip
+\pause	
+
+\begin{block}{Dynamic Algorithm Configuration: DAC}
+	The goal of DAC is to learn a policy from data\\ that adapts the \alert{hyperparameter settings} of an IOH.
+\end{block}
+
+\bigskip
+\pause
+
+\begin{block}{Learning to Learn: L2L}
+	The goal of L2L is to learn a \alert{proposal mechanism} from data. (Not covered in this lecture.)
+\end{block}
+	
+\end{frame}
+%-----------------------------------------------------------------------
+\begin{frame}[c]{Questions to Answer for Yourself / Discuss with Friends}
+    
+    \begin{enumerate}
+        \item Name a few hyperparameters and figure out whether you would need to dynamically adjust them?
+        \item Is the architecture of a neural network a static or dynamic decision?
+        \item Instead of ``simply'' learning to adjust hyperparameters, which components of training a DNN could be entirely learned from meta-data?
+    \end{enumerate}
+    
+\end{frame}
+
+\end{document}

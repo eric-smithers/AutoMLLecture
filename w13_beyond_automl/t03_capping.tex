@@ -1,0 +1,108 @@
+% !TeX spellcheck = en_US
+
+\input{../latex_main/main.tex}
+
+\title[AutoML: Capping]{AutoML: Beyond AutoML}
+\subtitle{Capping of Runtimes}
+\author[Marius Lindauer]{Bernd Bischl \and Frank Hutter \and Lars Kotthoff\newline \and \underline{Marius Lindauer} \and Joaquin Vanschoren}
+\institute{}
+\date{}
+
+% \AtBeginSection[] % Do nothing for \section*
+% {
+%   \begin{frame}{Outline}
+%     \bigskip
+%     \vfill
+%     \tableofcontents[currentsection]
+%   \end{frame}
+% }
+
+\begin{document}
+	
+	\maketitle
+
+
+%-----------------------------------------------------------------------
+\begin{frame}[c,fragile]{Adaptive capping \litw{\href{https://ml.informatik.uni-freiburg.de/papers/09-JAIR-ParamILS.pdf}{Hutter et al. 2009}}}
+
+\begin{itemize}
+	\item Assumptions
+	\begin{itemize} 
+		\item optimization of runtime
+		\item each configuration run has a time limit (e.g., $300$ sec)
+	\end{itemize}
+	\pause    
+	
+	\item E.g., $\finconf$ needed $1$ sec to solve $\inst_1$
+	\begin{itemize}
+		\item Do we need to run $\conf'$ for $300$ sec?
+		\item Terminate evaluation of $\conf'$ once guaranteed to be worse than $\finconf$
+	\end{itemize}
+	\pause
+	\bigskip    
+	\item[$\leadsto$] To compare against $\finconf$ based on $N$ runs,\\ we can terminate evaluation of $\conf'$ after time $\sum_{k=1}^N c(\finconf,\inst_k)$
+\end{itemize}
+
+\end{frame}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\begin{frame}[c,fragile]{Toy-Example: Adaptive capping}
+
+{runtime cutoff $\cutoff = 300$, comparison based on 2 instances}
+
+\begin{center}
+\begin{tabular}{l cc}
+	& $\inst_1$ & $\inst_2$ \\
+	\hline
+	$\finconf$ 	& 4 		& 2		\onslide<2->\\
+	\hline
+	\multicolumn{3}{l}{\emph{Without adaptive capping}}\\
+	$\conf'$		& \onslide<3->{3}			& \onslide<4->{300} 		\\
+	& 			&  \onslide<5->{$\to$ reject $\conf'$ (\alert{cost: 303})}\onslide<6->\\
+	\hline
+	\multicolumn{3}{l}{\onslide<6->{\emph{With adaptive capping}}}\\
+	$\conf'$\onslide<7->			& \onslide<7->{3}		& \onslide<8->{300} 	\\
+	& 					 \multicolumn{2}{l}{\onslide<9->$\to$ \alert{cut off} after $\kappa=4$ seconds, reject $\conf'$ (\alert{cost: 7})} \\
+	\hline
+\end{tabular}
+\end{center}
+
+\medskip
+\onslide<10-> 
+{Note: To combine adaptive capping with BO, we need to impute the censored observations caused by adaptive capping. \lit{\href{https://ml.informatik.uni-freiburg.de/papers/11-NIPS-workshop-BO-with-censoring.pdf}{Hutter et al. 2011}}}
+
+
+\end{frame}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\begin{frame}[fragile]{Overview of Racing and Adaptive Capping}
+\vspace{-1em}
+\LinesNotNumbered
+\begin{algorithm}[H]
+	\scriptsize
+	\Input{%
+		candidate configurations $\confs_{new}$, cutoff $\cutoff_{max}$, previously evaluated runs $\hist$, budget $\bobudget$, incumbent $\finconf$}
+	\While{$\confs_{new}$ not empty}{
+		$\confI{\bocount} \xleftarrow{} $ getNext$(\confs_{new})$;\\
+		$[\ldots$ add new run for incumbent $\ldots]$;\\
+		\While{true}{
+			$\insts^+, \mathbf{s}^+ \xleftarrow{} $getAlreadyEvaluatedOn$(\finconf, \hist)$;\\
+			$\insts^{(\bocount)}, \mathbf{s}^{(\bocount)} \xleftarrow{} $getAlreadyEvaluatedOn$(\confI{\bocount}, \hist)$;\\
+			$\instI{\bocount}, s^{(\bocount)} \xleftarrow{}$ drawn uniformly at random from $\insts_+ \setminus \insts^{(\bocount)}$ and $\mathbf{s}^+ \setminus \mathbf{s^{(\bocount)}}$;\\
+			\alert{$\cutoff^{(i)} \xleftarrow{}$ AdaptCutoff$(\cutoff_{max}, \langle(\confI{j}, \costI{j})\rangle_{\confI{j} = \conf^+}) \cdot \xi$;}\\
+			$c_i \xleftarrow{}$ EvaluateRun$(\confI{\bocount}, \instI{\bocount},  s^{(i)}, \alert{\cutoff^{(i)}})$;\\
+			$\hist \xleftarrow{} \hist \cup (\confI{\bocount}, \instI{\bocount},  s^{(\bocount)},  \cost^{(\bocount)})$;\\
+			\If{average cost of $\confI{\bocount} >$ average cost of $\finconf$ across $\insts^{(\bocount)}$ and $\mathbf{s}^{(\bocount)}$}{break;}
+			\ElseIf{average cost of $\confI{\bocount} <$ average cost of $\finconf$ and $\insts^+ =  \insts^{(\bocount)}$  and $\mathbf{s}^{(\bocount)} = \mathbf{s}^+$}{
+				$\finconf \xleftarrow{} \confI{\bocount}$;
+			}
+		}
+		\If{time spent exceeds $\bobudget$ or $\confs_{new}$ is empty} {
+			\Return{$\finconf, \hist$}
+		}
+	}
+\end{algorithm}
+\end{frame}
+%-----------------------------------------------------------------------
+
+\end{document}

@@ -1,0 +1,177 @@
+% !TeX spellcheck = en_US
+
+\input{../latex_main/main.tex}
+
+
+\title[AutoML: Learned LRs]{AutoML: Dynamic Configuration \& Learning}
+\subtitle{Learning to Adjust Learning Rates}
+\author[Marius Lindauer]{Bernd Bischl \and Frank Hutter \and Lars Kotthoff\newline \and \underline{Marius Lindauer} \and Joaquin Vanschoren}
+\institute{}
+\date{}
+
+
+
+% \AtBeginSection[] % Do nothing for \section*
+% {
+%   \begin{frame}{Outline}
+%     \bigskip
+%     \vfill
+%     \tableofcontents[currentsection]
+%   \end{frame}
+% }
+
+\begin{document}
+	
+	\maketitle
+	
+	
+%----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{Learning Problem \litw{\href{https://www.aaai.org/ocs/index.php/AAAI/AAAI16/paper/view/11763/11767}{Daniel et al. 2016}}}
+
+
+\begin{itemize}
+	\item Optimization of a function:
+\end{itemize}
+\begin{equation}
+	\weights \in \argmin F(\mathbf{X}; \weights) \nonumber
+\end{equation}
+
+where $\mathbf{X}$ is an input matrix and f is parameterized by $\weights$.
+
+
+\pause
+\medskip
+
+\begin{equation}
+F(\mathbf{X}; \weights) = \frac{1}{N} \sum_{i=1}^N f(\xI{i}; \weights) \nonumber
+\end{equation}
+
+
+
+
+\end{frame}
+%----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{Learning Step Size Policies \litw{\href{https://www.aaai.org/ocs/index.php/AAAI/AAAI16/paper/view/11763/11767}{Daniel et al. 2016}}}
+
+\begin{itemize}
+\item \alert{Idea:} Learn the hyperparameters of the weight update (short notation)
+\end{itemize} 
+
+\begin{eqnarray}
+\weights^{(t+1)} = \weights^{(t)} - \alpha^{(t)} \nabla F(\weights^{(t)}) \nonumber\\
+\nabla F(\weights^{(t)}) = \frac{1}{N} \sum_{i=1}^N \nabla f_i(\weights^{(t)})\nonumber
+\end{eqnarray}
+
+
+\begin{itemize}
+\pause
+\item For SGD, this would be for example the learning rate $\alpha$
+\pause
+\item \alert{Note (i)}: $\alpha$ have to be adapted in the course of the training
+\begin{itemize}
+\item similar to learning rate schedules (e.g., cosine annealing)
+\end{itemize}
+\pause
+\item \alert{Note(ii)}: later we denote the learnt hyperparameters as $\lambda$
+\medskip
+\pause
+\item \alert{Idea:} Use reinforcement learning to learn a policy $\policy: \stateRL \mapsto \actionRL$ to control the learning rate (or other adaptive hyperparameters)
+\end{itemize}
+
+
+
+\end{frame}
+%----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{Recap: Reinforcement Learning for Dynamic Algorithm Configuration}
+
+\begin{center}
+\input{tikz/control.tex}
+\end{center}
+
+\bigskip
+To apply that, we need to define:
+\begin{enumerate}
+	\item State description
+	\item Action space
+	\item Reward function
+\end{enumerate}
+
+\end{frame}
+
+%----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{RL for Step Size Policies: State \litw{\href{https://www.aaai.org/ocs/index.php/AAAI/AAAI16/paper/view/11763/11767}{Daniel et al. 2016}}}
+
+\textbf{Predictive change in function value:}
+
+$$s_1 = \log \left( \text{Var}(\Delta \tilde{f}_i ) \right)$$
+$$\Delta \tilde{f}_i = \tilde{f}(\xI{i} ; \theta + \delta \theta) - f(\xI{i} ; \theta)$$
+
+where $\tilde{f}(\xI{i} ; \theta + \delta \theta)$ is done by a first order Taylor expansion
+
+\pause
+\smallskip
+\textbf{Disagreement of function values:}
+$$ s_2 = \log \left(\text{Var}(f(\xI{i} ; \theta)) \right)$$
+
+\pause
+
+\textbf{Discounted Average} (smoothing noise from mini-batches):
+$$\hat{s}_i \leftarrow \gamma \hat{s_i} + (1 - \gamma) s_i$$
+
+\pause
+
+\textbf{Uncertainty Estimate} (noise level):
+$$s_{K+i} \leftarrow \gamma s_{K+i} + (1-\gamma) (s_i - \hat{s}_i)^2$$
+
+
+\end{frame}
+%----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{RL for Step Size Policies: Learning \litw{\href{https://www.aaai.org/ocs/index.php/AAAI/AAAI16/paper/view/11763/11767}{Daniel et al. 2016}}}
+
+Reward (average loss improvement over time):
+
+$$\rewardRL = \frac{1}{T-1} \sum_{t=2}^T \left(\log(\loss^{(t-1)}) - \log(\loss^{(t)})\right)$$
+
+\pause
+
+Optimal Policy:
+
+$$\policy^*(\lambda \mid \stateRL) \in \argmax_{\policy} \int \int p(\stateRL) \policy(\conf \mid \stateRL)r(\conf,\stateRL) \diff\stateRL \diff\conf $$
+
+\pause
+
+
+\begin{itemize}
+\item can be learnt for example via Relative Entropy Policy Search (REPS) \lit{\href{https://www.aaai.org/ocs/index.php/AAAI/AAAI10/paper/viewFile/1851/2264}{Peter et al. 2010}}
+\end{itemize}
+
+\end{frame}
+%----------------------------------------------------------------------
+%----------------------------------------------------------------------
+\begin{frame}[c]{RL for Step Size Policies: Training \litw{\href{https://www.aaai.org/ocs/index.php/AAAI/AAAI16/paper/view/11763/11767}{Daniel et al. 2016}}}
+
+\begin{itemize}
+\item Goal: obtain robust policies,\\ i.e., good performance for many different DNN architectures
+\begin{itemize}
+\item[$\leadsto$] Sample architectures e.g., with different numbers of filters and layers
+\item[$\leadsto$] (Sub-)Sample dataset
+\item[$\leadsto$] Sample number of optimization steps
+\end{itemize}
+\end{itemize}
+
+\pause 
+\medskip
+\centering
+\includegraphics[width=0.55\textwidth]{images/l2stepsizecontroler_mnist_training.png}
+
+"Ours" refers to the approach by \lit{\href{https://www.aaai.org/ocs/index.php/AAAI/AAAI16/paper/view/11763/11767}{Daniel et al. 2016}} and $\eta$ is the learning rate
+
+\end{frame}
+%----------------------------------------------------------------------
+
+\end{document}
